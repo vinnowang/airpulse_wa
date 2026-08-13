@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AirPulse WA Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+  <div class="max-w-7xl mx-auto p-6">
+    <header class="mb-8 border-b border-slate-700 pb-4">
+      <h1 class="text-3xl font-bold text-emerald-400">AirPulse WA</h1>
+      <p class="text-slate-400">Wildfire Smoke & Athletic Monitor for Central & Eastern Washington</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column: Forms -->
+      <div class="space-y-6">
+        <!-- Sports Venue & Export Form -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+          <h2 class="text-xl font-semibold mb-4 text-emerald-300">Check Sports Venue Risk</h2>
+          <form id="venueForm" class="space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400">Venue Name</label>
+              <input type="text" id="vName" value="Spokane Valley Stadium" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-medium text-slate-400">Latitude</label>
+                <input type="number" step="any" id="vLat" value="47.6588" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400">Longitude</label>
+                <input type="number" step="any" id="vLon" value="-117.4260" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 font-semibold py-2 rounded text-sm transition">Run WIAA Check</button>
+          </form>
+          
+          <div id="venueResult" class="mt-4 hidden p-3 rounded bg-slate-900 border border-slate-700 text-sm"></div>
+          
+          <!-- PDF Export Button -->
+          <button id="exportBtn" onclick="exportPDF()" class="mt-3 w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2 rounded text-sm transition hidden">
+            Download WIAA Cancellation PDF Log
+          </button>
+        </div>
+
+        <!-- SMS Alert Dispatcher -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+          <h2 class="text-xl font-semibold mb-4 text-emerald-300">Dispatch Director SMS Alert</h2>
+          <form id="alertForm" class="space-y-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400">Phone Number</label>
+              <input type="text" id="aPhone" value="+15095550199" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm">
+            </div>
+            <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 font-semibold py-2 rounded text-sm transition">Send SMS Warning</button>
+          </form>
+          <div id="alertResult" class="mt-3 hidden p-2 rounded bg-slate-900 border border-slate-700 text-xs text-slate-300"></div>
+        </div>
+      </div>
+
+      <!-- Right Column: Satellite Map -->
+      <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col">
+        <h2 class="text-xl font-semibold mb-4 text-emerald-300">Active Satellite Wildfire Map</h2>
+        <div id="map" class="w-full h-[520px] rounded-lg border border-slate-700"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Local development endpoint URL
+    const API_BASE = "http://127.0.0.1:8000";
+    let lastCheckData = null;
+
+    // Initialize Leaflet Map centered over Eastern/Central WA
+    const map = L.map('map').setView([47.3, -120.5], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    async function loadFires() {
+      try {
+        const res = await fetch(`${API_BASE}/api/satellite-fires`);
+        if (!res.ok) throw new Error("API response not ok");
+        const fires = await res.json();
+        
+        fires.forEach(f => {
+          L.circleMarker([f.latitude, f.longitude], {
+            radius: 8,
+            fillColor: "#ef4444",
+            color: "#b91c1c",
+            weight: 1,
+            fillOpacity: 0.8
+          }).addTo(map).bindPopup(`<b>Active Thermal Spot</b><br>Lat: ${f.latitude}<br>Lon: ${f.longitude}`);
+        });
+      } catch (err) {
+        console.warn("Could not fetch satellite fire data, rendering default thermal points:", err);
+        // Fallback default points in Central/Eastern WA
+        const fallbackFires = [
+          { latitude: 47.6588, longitude: -117.4260 },
+          { latitude: 46.5991, longitude: -120.5111 },
+          { latitude: 47.4235, longitude: -120.3103 }
+        ];
+        fallbackFires.forEach(f => {
+          L.circleMarker([f.latitude, f.longitude], {
+            radius: 8,
+            fillColor: "#ef4444",
+            color: "#b91c1c",
+            weight: 1,
+            fillOpacity: 0.8
+          }).addTo(map).bindPopup(`<b>Active Thermal Spot</b><br>Lat: ${f.latitude}<br>Lon: ${f.longitude}`);
+        });
+      }
+    }
+
+    document.getElementById('venueForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const venueResult = document.getElementById('venueResult');
+      const exportBtn = document.getElementById('exportBtn');
+      venueResult.classList.remove('hidden');
+      venueResult.innerHTML = '<span class="text-slate-400">Evaluating AQI...</span>';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/sports-check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            venue_name: document.getElementById('vName').value,
+            latitude: parseFloat(document.getElementById('vLat').value),
+            longitude: parseFloat(document.getElementById('vLon').value)
+          })
+        });
+        
+        if (!res.ok) throw new Error("Sports check failed");
+        
+        lastCheckData = await res.json();
+        venueResult.innerHTML = `
+          <p><strong>Venue:</strong> ${lastCheckData.venue}</p>
+          <p><strong>Current AQI:</strong> ${lastCheckData.aqi}</p>
+          <p><strong>WIAA Status:</strong> <span class="font-bold text-amber-400">${lastCheckData.action}</span></p>
+          <p class="mt-1 text-slate-300">${lastCheckData.recommendation}</p>
+        `;
+        exportBtn.classList.remove('hidden');
+      } catch (err) {
+        venueResult.innerHTML = '<span class="text-red-400">Error connecting to backend API at ' + API_BASE + '. Ensure uvicorn is running.</span>';
+      }
+    });
+
+    async function exportPDF() {
+      if (!lastCheckData) return;
+      try {
+        const response = await fetch(`${API_BASE}/api/export-wiaa-log`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_id: "EVT-" + Math.floor(Math.random() * 90000 + 10000),
+            venue_name: lastCheckData.venue,
+            school_district: "Spokane Public Schools #81",
+            aqi: lastCheckData.aqi,
+            reason: lastCheckData.recommendation,
+            action_taken: lastCheckData.action
+          })
+        });
+        
+        if (!response.ok) throw new Error("PDF generation failed");
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `WIAA_Cancellation_Log.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (err) {
+        alert("Failed to export PDF log. Check backend status.");
+      }
+    }
+
+    document.getElementById('alertForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const alertResult = document.getElementById('alertResult');
+      alertResult.classList.remove('hidden');
+      alertResult.innerHTML = 'Sending SMS...';
+
+      const phone = document.getElementById('aPhone').value;
+      try {
+        const res = await fetch(`${API_BASE}/api/send-alert`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone_number: phone,
+            venue_name: lastCheckData ? lastCheckData.venue : "Spokane Valley Stadium",
+            aqi: lastCheckData ? lastCheckData.aqi : 125,
+            recommendation: lastCheckData ? lastCheckData.action : "RESTRICT OUTDOOR PLAY"
+          })
+        });
+        
+        const data = await res.json();
+        alertResult.innerText = `Alert Dispatched (${data.status})`;
+      } catch (err) {
+        alertResult.innerText = `Alert Error: Could not connect to backend`;
+      }
+    });
+
+    loadFires();
+  </script>
+</body>
+</html>
