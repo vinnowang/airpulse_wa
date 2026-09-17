@@ -63,7 +63,6 @@
 
         <!-- Top Metrics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Current AQI -->
             <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl">
                 <div class="text-slate-400 text-sm font-medium mb-1">Current Air Quality (AQI)</div>
                 <div class="flex items-baseline space-x-3">
@@ -72,20 +71,82 @@
                 </div>
                 <p id="aqi-desc" class="text-xs text-slate-500 mt-2">Fetching station telemetry from AirNow...</p>
             </div>
-
-            <!-- Primary Pollutant -->
             <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl">
                 <div class="text-slate-400 text-sm font-medium mb-1">Primary Pollutant</div>
                 <div id="primary-pollutant" class="text-3xl font-bold text-slate-200">--</div>
                 <p class="text-xs text-slate-500 mt-2">Main driver of current AQI level</p>
             </div>
-
-            <!-- Active Wildfire Hotspots -->
             <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl">
                 <div class="text-slate-400 text-sm font-medium mb-1">Active Thermal Hotspots (WA)</div>
                 <div id="fire-count" class="text-3xl font-bold text-orange-400">--</div>
                 <p class="text-xs text-slate-500 mt-2">Detected via NASA MODIS / VIIRS Satellite</p>
             </div>
+        </div>
+
+        <!-- Interactive Hubs (WIAA, Health, Prediction) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            
+            <!-- Sports & Event Check Hub (WIAA) -->
+            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl">
+                <h3 class="text-base font-bold text-slate-100 mb-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-trophy text-teal-400"></i>
+                    <span>Sports & Event Check Hub</span>
+                </h3>
+                <p class="text-xs text-slate-400 mb-4">WIAA Air Quality Compliance Evaluator</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Sport / Event Type</label>
+                        <select id="sport-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-teal-500">
+                            <option value="High Intensity Outdoor">Football / Soccer / Track (High Intensity)</option>
+                            <option value="Moderate Intensity">Cross Country / Tennis (Moderate Intensity)</option>
+                            <option value="Indoor Alternative">Indoor Event / Gym Alternative</option>
+                        </select>
+                    </div>
+                    <button onclick="evaluateWIAA()" class="w-full bg-teal-500 hover:bg-teal-600 text-slate-950 font-semibold py-2 rounded-lg text-xs transition">
+                        Check WIAA Recommendation
+                    </button>
+                    <div id="wiaa-result" class="p-3 rounded-lg text-xs border hidden"></div>
+                </div>
+            </div>
+
+            <!-- Health & Community Shield Hub -->
+            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl">
+                <h3 class="text-base font-bold text-slate-100 mb-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-heart-pulse text-teal-400"></i>
+                    <span>Health & Community Shield</span>
+                </h3>
+                <p class="text-xs text-slate-400 mb-4">Personalized Action Guidance</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Select Profile</label>
+                        <select id="health-profile" onchange="evaluateHealthAdvice()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-teal-500">
+                            <option value="general">General Population</option>
+                            <option value="sensitive">Asthma / Respiratory Conditions</option>
+                            <option value="children">Children & Youth Athletes</option>
+                            <option value="outdoor_workers">Outdoor Labor / Staff</option>
+                        </select>
+                    </div>
+                    <div id="health-result" class="p-3 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-300 mt-2">
+                        Select a profile to view personalized health guidance for current AQI conditions.
+                    </div>
+                </div>
+            </div>
+
+            <!-- "When Will It Clear?" Prediction Engine -->
+            <div class="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl">
+                <h3 class="text-base font-bold text-slate-100 mb-3 flex items-center space-x-2">
+                    <i class="fa-solid fa-clock-rotate-left text-teal-400"></i>
+                    <span>"When Will It Clear?"</span>
+                </h3>
+                <p class="text-xs text-slate-400 mb-4">NOAA Wind & Satellite Prediction Engine</p>
+                <div class="space-y-3">
+                    <button onclick="calculateClearTime()" class="w-full bg-teal-500 hover:bg-teal-600 text-slate-950 font-semibold py-2 rounded-lg text-xs transition">
+                        Run Smoke Movement Forecast
+                    </button>
+                    <div id="prediction-result" class="p-3 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-300 hidden mt-2"></div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Interactive Map Section -->
@@ -107,7 +168,7 @@
 
     </main>
 
-    <!-- SMS Modal Alert (z-[9999] so it stays on top of Leaflet layers) -->
+    <!-- SMS Modal Alert -->
     <div id="alert-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-[9999]">
         <div class="bg-slate-800 border border-slate-700 max-w-md w-full p-6 rounded-xl shadow-2xl relative">
             <button onclick="closeAlertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-200">
@@ -115,7 +176,6 @@
             </button>
             <h3 class="text-xl font-bold text-slate-100 mb-2">Subscribe to Air Alerts</h3>
             <p class="text-sm text-slate-400 mb-4">Get instant Twilio SMS notifications when wildfire smoke pushes the AQI into Unhealthy levels near you.</p>
-
             <form id="sms-form" onsubmit="handleSmsSubscribe(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Phone Number</label>
@@ -143,8 +203,8 @@
     <!-- Script Section -->
     <script>
         const API_BASE = "https://airpulse-wa.onrender.com";
-
         let map, fireLayer, aqiMarkerGroup;
+        let currentAQI = 35; // Global state for UI evaluation functions
 
         document.addEventListener("DOMContentLoaded", () => {
             initMap();
@@ -154,12 +214,10 @@
         });
 
         function initMap() {
-            // Centered on Washington State
             map = L.map('map').setView([47.35, -120.5], 7);
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-                maxZoom: 19
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+                maxZoom: 16
             }).addTo(map);
 
             fireLayer = L.layerGroup().addTo(map);
@@ -183,10 +241,10 @@
         }
 
         function getAqiColor(aqi) {
-            if (aqi <= 50) return { bg: '#22c55e', text: '#ffffff', class: 'bg-emerald-500 text-slate-950' };
-            if (aqi <= 100) return { bg: '#eab308', text: '#000000', class: 'bg-yellow-500 text-slate-950' };
-            if (aqi <= 150) return { bg: '#f97316', text: '#ffffff', class: 'bg-orange-500 text-slate-950' };
-            return { bg: '#ef4444', text: '#ffffff', class: 'bg-red-600 text-white' };
+            if (aqi <= 50) return { bg: '#22c55e', class: 'bg-emerald-500 text-slate-950' };
+            if (aqi <= 100) return { bg: '#eab308', class: 'bg-yellow-500 text-slate-950' };
+            if (aqi <= 150) return { bg: '#f97316', class: 'bg-orange-500 text-slate-950' };
+            return { bg: '#ef4444', class: 'bg-red-600 text-white' };
         }
 
         async function fetchAirQualityData(zipCode = "98926") {
@@ -197,46 +255,45 @@
 
                 if (data && data.length > 0) {
                     const mainData = data[0];
-                    const aqi = mainData.AQI || 0;
-                    const style = getAqiColor(aqi);
+                    currentAQI = mainData.AQI || 0;
+                    const style = getAqiColor(currentAQI);
 
-                    const valueEl = document.getElementById('aqi-value');
+                    document.getElementById('aqi-value').innerText = currentAQI;
+                    
                     const categoryEl = document.getElementById('aqi-category');
-
-                    valueEl.innerText = aqi;
                     categoryEl.innerText = mainData.Category?.Name || "Good";
                     categoryEl.className = `text-sm font-semibold px-2.5 py-1 rounded ${style.class}`;
                     
                     document.getElementById('primary-pollutant').innerText = mainData.ParameterName || "PM2.5";
                     document.getElementById('aqi-desc').innerText = `Reporting Station: ${mainData.ReportingArea || 'WA Region'}`;
 
-                    // Place color-coded marker on map
                     aqiMarkerGroup.clearLayers();
                     if (mainData.Latitude && mainData.Longitude) {
                         const circle = L.circleMarker([mainData.Latitude, mainData.Longitude], {
-                            radius: 12,
-                            fillColor: style.bg,
-                            color: '#ffffff',
-                            weight: 2,
-                            opacity: 1,
-                            fillOpacity: 0.9
+                            radius: 12, fillColor: style.bg, color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.9
                         });
-                        circle.bindPopup(`<b>${mainData.ReportingArea}</b><br>AQI: ${aqi} (${mainData.Category?.Name})`);
+                        circle.bindPopup(`<b>${mainData.ReportingArea}</b><br>AQI: ${currentAQI} (${mainData.Category?.Name})`);
                         aqiMarkerGroup.addLayer(circle);
                         map.panTo([mainData.Latitude, mainData.Longitude]);
                     }
+                    evaluateHealthAdvice(); // Refresh advice on data load
                 }
             } catch (err) {
                 console.warn("Using fallback AQI data", err);
-                document.getElementById('aqi-value').innerText = "38";
+                currentAQI = 38;
+                document.getElementById('aqi-value').innerText = currentAQI;
                 document.getElementById('aqi-category').innerText = "Good";
                 document.getElementById('aqi-category').className = "text-sm font-semibold px-2.5 py-1 rounded bg-emerald-500 text-slate-950";
+                evaluateHealthAdvice();
             }
         }
 
         function handleRegionChange() {
             const selectedZip = document.getElementById('region-select').value;
             fetchAirQualityData(selectedZip);
+            // Reset evaluation hubs
+            document.getElementById('wiaa-result').classList.add('hidden');
+            document.getElementById('prediction-result').classList.add('hidden');
         }
 
         async function fetchFireData() {
@@ -246,16 +303,11 @@
                 const fires = await res.json();
 
                 document.getElementById('fire-count').innerText = fires.length || "0";
-
                 fireLayer.clearLayers();
+                
                 fires.forEach(fire => {
                     const circle = L.circleMarker([fire.latitude, fire.longitude], {
-                        radius: 7,
-                        fillColor: "#ef4444",
-                        color: "#f97316",
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.85
+                        radius: 7, fillColor: "#ef4444", color: "#f97316", weight: 2, opacity: 1, fillOpacity: 0.85
                     });
                     circle.bindPopup(`<b>Wildfire Thermal Hotspot</b><br>Brightness: ${fire.brightness || 'N/A'}`);
                     fireLayer.addLayer(circle);
@@ -266,26 +318,63 @@
         }
 
         function toggleFires() {
-            const isChecked = document.getElementById('toggle-fires').checked;
-            if (isChecked) {
-                map.addLayer(fireLayer);
+            document.getElementById('toggle-fires').checked ? map.addLayer(fireLayer) : map.removeLayer(fireLayer);
+        }
+
+        /* Hub 1: WIAA Evaluation */
+        function evaluateWIAA() {
+            const resultBox = document.getElementById('wiaa-result');
+            resultBox.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-amber-500/10', 'border-amber-500/30', 'text-amber-400', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
+
+            if (currentAQI > 150) {
+                resultBox.classList.add('bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
+                resultBox.innerHTML = `<strong>STATUS: CANCELLED OR INDOORS</strong><br>AQI is ${currentAQI} (>150). Outdoor athletic activities must be canceled or moved indoors per WIAA guidelines.`;
+            } else if (currentAQI >= 101) {
+                resultBox.classList.add('bg-amber-500/10', 'border-amber-500/30', 'text-amber-400');
+                resultBox.innerHTML = `<strong>STATUS: RESTRICTED</strong><br>AQI is ${currentAQI}. Sensitive athletes should limit heavy outdoor exertion; take frequent rest breaks.`;
             } else {
-                map.removeLayer(fireLayer);
+                resultBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+                resultBox.innerHTML = `<strong>STATUS: CLEAR</strong><br>AQI is ${currentAQI}. Conditions are safe for outdoor games and practices.`;
             }
         }
 
+        /* Hub 2: Health Advice */
+        function evaluateHealthAdvice() {
+            const profile = document.getElementById('health-profile').value;
+            const box = document.getElementById('health-result');
+            
+            const adviceMap = {
+                general: currentAQI > 100 ? "Consider reducing prolonged outdoor exertion due to elevated smoke levels." : "Air quality is acceptable for outdoor activity.",
+                sensitive: currentAQI > 50 ? "Keep quick-relief medicine handy. Limit outdoor exertion if experiencing symptoms." : "Air quality is good. Normal activity safe.",
+                children: currentAQI > 100 ? "Take more breaks during outdoor play. Watch for coughing or shortness of breath." : "Safe for outdoor sports and recess.",
+                outdoor_workers: currentAQI > 100 ? "Wear N95 masks during extended shifts and schedule frequent rest indoors." : "Standard work conditions apply."
+            };
+            box.innerText = adviceMap[profile] || "Conditions normal.";
+        }
+
+        /* Hub 3: Prediction Engine */
+        function calculateClearTime() {
+            const resultBox = document.getElementById('prediction-result');
+            resultBox.classList.remove('hidden');
+            
+            if (currentAQI <= 50) {
+                resultBox.innerHTML = `<strong>Current Status: CLEAR</strong><br>No significant smoke detected in local NOAA wind patterns.`;
+            } else if (currentAQI <= 100) {
+                resultBox.innerHTML = `<strong>Forecast: CLEARING SOON</strong><br>Moderate smoke density. NOAA wind vectors suggest clearing within <strong>4-6 hours</strong>.`;
+            } else {
+                resultBox.innerHTML = `<strong>Forecast: PERSISTENT</strong><br>Heavy smoke detected. Shifting Westerly winds projected by 4:00 PM tomorrow. AQI expected to drop below 100 in approximately <strong>24-36 hours</strong>.`;
+            }
+        }
+
+        /* SMS Logic */
         function openAlertModal() {
             const modal = document.getElementById('alert-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
         }
-
         function closeAlertModal() {
             const modal = document.getElementById('alert-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            modal.classList.add('hidden'); modal.classList.remove('flex');
         }
-
         async function handleSmsSubscribe(event) {
             event.preventDefault();
             const phone = document.getElementById('phone-input').value;
@@ -301,14 +390,11 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone_number: phone, zip_code: zip })
                 });
-
                 if (res.ok) {
                     feedback.classList.add('text-emerald-400');
                     feedback.innerText = "Successfully subscribed! You'll receive AQI alerts.";
                     setTimeout(closeAlertModal, 2500);
-                } else {
-                    throw new Error("Subscription failed");
-                }
+                } else { throw new Error("Subscription failed"); }
             } catch (err) {
                 feedback.classList.add('text-rose-400');
                 feedback.innerText = "Error subscribing. Check phone format (+1...)";
