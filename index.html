@@ -253,12 +253,11 @@
           statusText.innerText = "API Connected";
           statusDot.className = "h-2 w-2 rounded-full bg-emerald-400 animate-pulse";
         } else {
-          statusText.innerText = "API Error";
-          statusDot.className = "h-2 w-2 rounded-full bg-rose-500";
+          throw new Error("Bad response");
         }
       } catch {
-        statusText.innerText = "Offline / Local";
-        statusDot.className = "h-2 w-2 rounded-full bg-amber-400";
+        statusText.innerText = "API Error";
+        statusDot.className = "h-2 w-2 rounded-full bg-rose-500";
       }
     }
 
@@ -266,7 +265,7 @@
     async function fetchAQI() {
       try {
         const res = await fetch('/api/air-quality');
-        if (!res.ok) return;
+        if (!res.ok) throw new Error("AQI Fetch Failed");
         const data = await res.json();
 
         const aqi = data.aqi ?? data.AQI ?? 26;
@@ -280,6 +279,8 @@
         document.getElementById('aqi-bar').style.width = `${pct}%`;
       } catch (e) {
         console.warn("Using default/fallback AQI view", e);
+        document.getElementById('aqi-value').innerText = "26";
+        document.getElementById('aqi-category').innerText = "Good";
       }
     }
 
@@ -287,7 +288,7 @@
     async function fetchSportsGuidance() {
       try {
         const res = await fetch('/api/sports-safety');
-        if (!res.ok) return;
+        if (!res.ok) throw new Error("Sports Fetch Failed");
         const data = await res.json();
 
         if (data.guideline) {
@@ -298,16 +299,19 @@
         }
       } catch (e) {
         console.warn("Sports endpoint not responding", e);
+        // Fallback UI to prevent infinite "Loading..."
+        document.getElementById('sports-guideline').innerText = "Real-time guidelines unavailable. Please check local WIAA status manually.";
+        document.getElementById('sports-status').innerText = "Status Unknown";
       }
     }
 
-    // 4. Initialize Map with Clean Free Basemap Tiles
+    // 4. Initialize Map with Dark Mode Carto Tiles
     function initMap() {
       map = L.map('map').setView([47.0001, -120.5478], 8);
 
-      // Clean OpenStreetMap tiles (No "API Key Required" watermarks)
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
+      // CartoDB Dark Matter Base Map
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
         maxZoom: 19
       }).addTo(map);
 
@@ -331,7 +335,7 @@
     async function fetchWildfireData() {
       try {
         const response = await fetch('/api/wildfires');
-        if (!response.ok) return;
+        if (!response.ok) throw new Error("Wildfire Fetch Failed");
         const fires = await response.json();
 
         document.getElementById('fire-count').innerText = fires.length;
@@ -352,6 +356,7 @@
         });
       } catch (err) {
         console.warn("Wildfire endpoint fetch issue", err);
+        document.getElementById('fire-count').innerText = "0";
       }
     }
 
