@@ -4,46 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AirPulse WA - Air Quality & Wildfire Dashboard</title>
-
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <style>
-    #map {
-      height: 520px;
-      border-radius: 1rem;
-      z-index: 10;
-    }
-
+    #map { height: 520px; border-radius: 1rem; z-index: 10; }
     @keyframes pulse-ring {
       0% { transform: scale(0.35); opacity: 0.8; }
       80%, 100% { transform: scale(2.2); opacity: 0; }
     }
-
     .fire-marker-pin {
-      width: 16px;
-      height: 16px;
-      background: #f97316;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      position: relative;
-      box-shadow: 0 0 12px rgba(249, 115, 22, 0.8);
+      width: 16px; height: 16px; background: #f97316; border: 2px solid #fff;
+      border-radius: 50%; position: relative; box-shadow: 0 0 12px rgba(249, 115, 22, 0.8);
     }
-
     .fire-marker-pin::after {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 2px solid #f97316;
-      animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+      content: ''; position: absolute; inset: -6px; border-radius: 50%;
+      border: 2px solid #f97316; animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
     }
   </style>
 </head>
@@ -75,8 +52,6 @@
 
   <!-- Main Content -->
   <main class="max-w-7xl w-full mx-auto px-4 py-6 flex-grow">
-
-    <!-- Tab Bar -->
     <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
       <div class="inline-flex p-1 bg-slate-800/80 border border-slate-700/60 rounded-xl space-x-1 shadow-inner">
         <button id="tab-overview-btn" onclick="switchTab('overview')" class="px-5 py-2 text-xs font-semibold rounded-lg bg-teal-500 text-slate-950 transition-all shadow">
@@ -86,16 +61,13 @@
           <i class="fa-solid fa-map-location-dot mr-1.5"></i> Full Screen Map
         </button>
       </div>
-
       <span class="text-xs text-slate-400 hidden md:inline-block">
         <i class="fa-solid fa-location-dot text-teal-400 mr-1"></i> Location: <strong>Central Washington</strong>
       </span>
     </div>
 
-    <!-- VIEW 1: OVERVIEW & HUBS -->
     <div id="overview-view" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
         <!-- AQI Card -->
         <div class="relative bg-slate-800/60 backdrop-blur-xl border border-slate-700/60 p-6 rounded-2xl shadow-xl overflow-hidden group hover:border-emerald-500/50 transition-all duration-300">
           <div class="flex items-center justify-between mb-2">
@@ -105,19 +77,15 @@
               <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
           </div>
-          
           <div class="flex items-baseline space-x-3 my-2">
             <span id="aqi-value" class="text-5xl font-black tracking-tight text-white">--</span>
-            <span id="aqi-category" class="px-3 py-1 text-xs font-bold rounded-full bg-slate-700 text-slate-300 border border-slate-600 backdrop-blur-md">
-              Loading...
-            </span>
+            <span id="aqi-category" class="px-3 py-1 text-xs font-bold rounded-full bg-slate-700 text-slate-300 border border-slate-600 backdrop-blur-md">Loading...</span>
           </div>
-
           <div class="w-full bg-slate-700/50 h-2 rounded-full mt-4 overflow-hidden p-0.5 border border-slate-600/30">
             <div id="aqi-bar" class="bg-teal-400 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%;"></div>
           </div>
-          <p id="aqi-desc" class="text-xs text-slate-400 mt-3 flex items-center gap-1">
-            <i class="fa-solid fa-circle-info text-teal-400 text-[10px]"></i> Live AQI from Washington DOE Monitoring
+          <p class="text-xs text-slate-400 mt-3 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-teal-400 text-[10px]"></i> Live AQI from Washington DOE
           </p>
         </div>
 
@@ -133,15 +101,11 @@
                 <p class="text-xs text-slate-400">WIAA Air Quality Guidelines</p>
               </div>
             </div>
-            <p id="sports-guideline" class="text-xs text-slate-300 leading-relaxed mt-2">
-              Loading athletic safety guidelines...
-            </p>
+            <p id="sports-guideline" class="text-xs text-slate-300 leading-relaxed mt-2">Loading athletic safety guidelines...</p>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-700/50 flex justify-between items-center text-xs text-slate-400">
             <span>WIAA Status</span>
-            <span id="sports-status" class="text-slate-300 font-semibold flex items-center gap-1">
-              --
-            </span>
+            <span id="sports-status" class="text-slate-300 font-semibold flex items-center gap-1">--</span>
           </div>
         </div>
 
@@ -167,7 +131,6 @@
             <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </button>
         </div>
-
       </div>
 
       <!-- Map Container -->
@@ -186,7 +149,6 @@
       </div>
     </div>
 
-    <!-- VIEW 2: FULL MAP TAB -->
     <div id="map-view" class="hidden space-y-4">
       <div class="bg-slate-800/60 backdrop-blur-xl border border-slate-700/60 p-4 rounded-2xl shadow-xl">
         <div class="flex items-center justify-between mb-3 px-2">
@@ -194,13 +156,11 @@
             <h2 class="font-bold text-slate-100 text-base flex items-center gap-2">
               <i class="fa-solid fa-layer-group text-teal-400"></i> Central WA Air Quality & Active Fire Map
             </h2>
-            <p class="text-xs text-slate-400">Real-time thermal satellite data layer combined with ground monitor stations.</p>
           </div>
         </div>
         <div id="full-map-container" class="rounded-xl overflow-hidden border border-slate-700/50"></div>
       </div>
     </div>
-
   </main>
 
   <!-- SMS Modal -->
@@ -209,41 +169,25 @@
       <button onclick="closeAlertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
-
       <div class="flex items-center space-x-3">
         <div class="p-3 bg-teal-500/10 border border-teal-500/20 rounded-xl text-teal-400">
           <i class="fa-solid fa-mobile-screen-button text-xl"></i>
         </div>
         <div>
-          <h3 class="font-bold text-slate-100 text-base">Subscribe to Air Quality Alerts</h3>
-          <p class="text-xs text-slate-400">Get SMS notifications when AQI exceeds safe thresholds.</p>
+          <h3 class="font-bold text-slate-100 text-base">Subscribe to Alerts</h3>
         </div>
       </div>
-
-      <form id="sms-form" onsubmit="handleSmsSubscribe(event)" class="space-y-3 pt-2">
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Phone Number</label>
-          <input type="tel" id="phone-input" placeholder="+1 (509) 555-0199" required
-                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500 transition-colors">
-        </div>
-
-        <button type="submit" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-teal-500/20">
-          Subscribe Now
-        </button>
+      <form onsubmit="handleSmsSubscribe(event)" class="space-y-3 pt-2">
+        <input type="tel" id="phone-input" placeholder="+1 (509) 555-0199" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500 transition-colors">
+        <button type="submit" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs py-3 rounded-xl transition-all shadow-lg shadow-teal-500/20">Subscribe Now</button>
       </form>
       <p id="sms-status" class="text-xs text-center font-medium hidden"></p>
     </div>
   </div>
 
-  <footer class="border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
-    <p>AirPulse WA &bull; Built with FastAPI, Leaflet, and Tailwind CSS</p>
-  </footer>
-
   <script>
-    let map;
-    let fireLayer;
+    let map, fireLayer;
 
-    // 1. Check Backend API Connection Health
     async function checkBackendHealth() {
       const statusText = document.getElementById('backend-status');
       const statusDot = document.getElementById('backend-dot');
@@ -252,179 +196,98 @@
         if (res.ok) {
           statusText.innerText = "API Connected";
           statusDot.className = "h-2 w-2 rounded-full bg-emerald-400 animate-pulse";
-        } else {
-          throw new Error("Bad response");
-        }
+        } else throw new Error();
       } catch {
         statusText.innerText = "API Error";
         statusDot.className = "h-2 w-2 rounded-full bg-rose-500";
       }
     }
 
-    // 2. Fetch Live AQI Data from Backend
     async function fetchAQI() {
       try {
         const res = await fetch('/api/air-quality');
-        if (!res.ok) throw new Error("AQI Fetch Failed");
+        if (!res.ok) throw new Error();
         const data = await res.json();
-
-        const aqi = data.aqi ?? data.AQI ?? 26;
-        const category = data.category ?? data.Category?.Name ?? "Good";
-
-        document.getElementById('aqi-value').innerText = aqi;
-        document.getElementById('aqi-category').innerText = category;
-
-        // Scale bar width (AQI max capped at 300 for bar display)
-        const pct = Math.min(100, Math.round((aqi / 300) * 100));
-        document.getElementById('aqi-bar').style.width = `${pct}%`;
-      } catch (e) {
-        console.warn("Using default/fallback AQI view", e);
+        document.getElementById('aqi-value').innerText = data.aqi ?? 26;
+        document.getElementById('aqi-category').innerText = data.category ?? "Good";
+        document.getElementById('aqi-bar').style.width = `${Math.min(100, Math.round(((data.aqi ?? 26) / 300) * 100))}%`;
+      } catch {
         document.getElementById('aqi-value').innerText = "26";
         document.getElementById('aqi-category').innerText = "Good";
       }
     }
 
-    // 3. Fetch Sports & WIAA Guidance from Backend
     async function fetchSportsGuidance() {
       try {
         const res = await fetch('/api/sports-safety');
-        if (!res.ok) throw new Error("Sports Fetch Failed");
+        if (!res.ok) throw new Error();
         const data = await res.json();
-
-        if (data.guideline) {
-          document.getElementById('sports-guideline').innerText = data.guideline;
-        }
-        if (data.status) {
-          document.getElementById('sports-status').innerText = data.status;
-        }
-      } catch (e) {
-        console.warn("Sports endpoint not responding", e);
-        // Fallback UI to prevent infinite "Loading..."
-        document.getElementById('sports-guideline').innerText = "Real-time guidelines unavailable. Please check local WIAA status manually.";
+        document.getElementById('sports-guideline').innerText = data.guideline || "Guidelines active.";
+        document.getElementById('sports-status').innerText = data.status || "Unrestricted";
+      } catch {
+        document.getElementById('sports-guideline').innerText = "Real-time guidelines unavailable.";
         document.getElementById('sports-status').innerText = "Status Unknown";
       }
     }
 
-    // 4. Initialize Map with Dark Mode Carto Tiles
     function initMap() {
       map = L.map('map').setView([47.0001, -120.5478], 8);
-
-      // CartoDB Dark Matter Base Map
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        maxZoom: 19
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri',
+        maxZoom: 16
       }).addTo(map);
 
       fireLayer = L.layerGroup().addTo(map);
-
-      const stationIcon = L.divIcon({
-        className: 'custom-station-icon',
-        html: `<div class="w-4 h-4 bg-teal-400 border-2 border-white rounded-full shadow-lg shadow-teal-500/50"></div>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-      });
-
-      L.marker([47.0001, -120.5478], { icon: stationIcon })
-        .addTo(map)
-        .bindPopup(`<b>Ellensburg Central Station</b><br>Air Quality Index: Active`);
-
       fetchWildfireData();
     }
 
-    // 5. Fetch Satellite Fires
     async function fetchWildfireData() {
       try {
-        const response = await fetch('/api/wildfires');
-        if (!response.ok) throw new Error("Wildfire Fetch Failed");
-        const fires = await response.json();
-
+        const res = await fetch('/api/wildfires');
+        if (!res.ok) throw new Error();
+        const fires = await res.json();
         document.getElementById('fire-count').innerText = fires.length;
 
         const fireIcon = L.divIcon({
           className: 'custom-fire-icon',
           html: `<div class="fire-marker-pin"></div>`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8]
+          iconSize: [16, 16], iconAnchor: [8, 8]
         });
 
         fires.forEach(fire => {
           if (fire.latitude && fire.longitude) {
-            L.marker([fire.latitude, fire.longitude], { icon: fireIcon })
-              .addTo(fireLayer)
-              .bindPopup(`<b>Wildfire Hotspot</b><br>Brightness: ${fire.brightness || 'N/A'}`);
+            L.marker([fire.latitude, fire.longitude], { icon: fireIcon }).addTo(fireLayer);
           }
         });
-      } catch (err) {
-        console.warn("Wildfire endpoint fetch issue", err);
+      } catch {
         document.getElementById('fire-count').innerText = "0";
       }
     }
 
-    // Modal Control
     function openAlertModal() { document.getElementById('alert-modal').classList.remove('hidden'); }
     function closeAlertModal() { document.getElementById('alert-modal').classList.add('hidden'); }
-
-    async function handleSmsSubscribe(e) {
-      e.preventDefault();
-      const phone = document.getElementById('phone-input').value;
-      const statusEl = document.getElementById('sms-status');
-
-      statusEl.innerText = "Subscribing...";
-      statusEl.className = "text-xs text-center font-medium text-teal-400 block";
-
-      try {
-        const res = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone_number: phone })
-        });
-
-        if (res.ok) {
-          statusEl.innerText = "Successfully subscribed to SMS alerts!";
-          statusEl.className = "text-xs text-center font-medium text-emerald-400 block";
-          setTimeout(closeAlertModal, 2000);
-        } else {
-          statusEl.innerText = "Failed to subscribe. Please try again.";
-          statusEl.className = "text-xs text-center font-medium text-rose-400 block";
-        }
-      } catch (err) {
-        statusEl.innerText = "Error connecting to server.";
-        statusEl.className = "text-xs text-center font-medium text-rose-400 block";
-      }
-    }
-
-    // Tab Switcher
+    
     function switchTab(view) {
-      const overviewSection = document.getElementById('overview-view');
-      const mapSection = document.getElementById('map-view');
-      const overviewBtn = document.getElementById('tab-overview-btn');
-      const mapBtn = document.getElementById('tab-map-btn');
-      const mapElement = document.getElementById('map');
+      const oView = document.getElementById('overview-view'), mView = document.getElementById('map-view');
+      const oBtn = document.getElementById('tab-overview-btn'), mBtn = document.getElementById('tab-map-btn');
+      const mapEl = document.getElementById('map');
 
       if (view === 'overview') {
-        overviewSection.classList.remove('hidden');
-        mapSection.classList.add('hidden');
-        document.getElementById('overview-map-container').appendChild(mapElement);
-
-        overviewBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg bg-teal-500 text-slate-950 transition-all shadow";
-        mapBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+        oView.classList.remove('hidden'); mView.classList.add('hidden');
+        document.getElementById('overview-map-container').appendChild(mapEl);
+        oBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg bg-teal-500 text-slate-950 transition-all shadow";
+        mBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
       } else {
-        overviewSection.classList.add('hidden');
-        mapSection.classList.remove('hidden');
-        document.getElementById('full-map-container').appendChild(mapElement);
-
-        mapBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg bg-teal-500 text-slate-950 transition-all shadow";
-        overviewBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
+        oView.classList.add('hidden'); mView.classList.remove('hidden');
+        document.getElementById('full-map-container').appendChild(mapEl);
+        mBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg bg-teal-500 text-slate-950 transition-all shadow";
+        oBtn.className = "px-5 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all";
       }
-
       setTimeout(() => { if (map) map.invalidateSize(); }, 100);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      checkBackendHealth();
-      fetchAQI();
-      fetchSportsGuidance();
-      initMap();
+      checkBackendHealth(); fetchAQI(); fetchSportsGuidance(); initMap();
     });
   </script>
 </body>
